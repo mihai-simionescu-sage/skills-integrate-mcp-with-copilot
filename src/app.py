@@ -106,7 +106,7 @@ def get_activities():
 @app.post("/login")
 def login(username: str, password: str, response: Response):
     """Login endpoint for teachers"""
-    if username in teachers and teachers[username] == password:
+    if username in teachers and secrets.compare_digest(teachers[username], password):
         # Generate session token
         token = secrets.token_urlsafe(32)
         sessions[token] = username
