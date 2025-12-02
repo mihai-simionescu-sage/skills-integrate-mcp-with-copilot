@@ -208,7 +208,9 @@ document.addEventListener("DOMContentLoaded", () => {
   // Handle unregister functionality
   async function handleUnregister(event) {
     if (!isAuthenticated) {
-      alert("You must be logged in as a teacher to unregister students.");
+      messageDiv.textContent = "You must be logged in as a teacher to unregister students.";
+      messageDiv.className = "error";
+      messageDiv.classList.remove("hidden");
       return;
     }
     
