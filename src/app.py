@@ -8,6 +8,7 @@ for extracurricular activities at Mergington High School.
 from fastapi import FastAPI, HTTPException, Request, Response, Cookie
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import RedirectResponse
+from pydantic import BaseModel
 import os
 import json
 import secrets
@@ -33,6 +34,11 @@ def load_teachers():
         return {t['username']: t['password'] for t in data['teachers']}
 
 teachers = load_teachers()
+
+# Pydantic models
+class LoginRequest(BaseModel):
+    username: str
+    password: str
 
 # In-memory activity database
 activities = {
@@ -104,16 +110,16 @@ def get_activities():
 
 
 @app.post("/login")
-def login(username: str, password: str, response: Response):
+def login(credentials: LoginRequest, response: Response):
     """Login endpoint for teachers"""
-    if username in teachers and secrets.compare_digest(teachers[username], password):
+    if credentials.username in teachers and secrets.compare_digest(teachers[credentials.username], credentials.password):
         # Generate session token
         token = secrets.token_urlsafe(32)
-        sessions[token] = username
+        sessions[token] = credentials.username
         
         # Set cookie
         response.set_cookie(key="session_token", value=token, httponly=True, max_age=86400)  # 24 hours
-        return {"message": "Login successful", "username": username}
+        return {"message": "Login successful", "username": credentials.username}
     else:
         raise HTTPException(status_code=401, detail="Invalid credentials")
 
